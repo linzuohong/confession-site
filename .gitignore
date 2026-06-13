@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+.AppleDouble
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Deps (keep vendor dir, ignore large libs if added later)
+vendor/*.js
+!vendor/.gitkeep

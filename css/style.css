@@ -1,0 +1,402 @@
+/* ============================================================
+ * style.css · 引擎 + 内容样式
+ * 设计令牌在 :root 一处调，换色只改这里
+ * ============================================================ */
+
+/* ---------- 0. 设计令牌 ---------- */
+:root {
+  /* 强调色 → 朱砂红 #D9341C（深暖红，纯黑底最稳） */
+  --ac: #D9341C;
+  --ac-dim: #8B1A0E;
+  --ac-glow: rgba(217, 52, 28, 0.18);
+
+  /* 中性灰三档 */
+  --ink: #FFFFFF;
+  --ink-2: #C4C4C4;    /* 次级文字，足够亮 + 字重落差 */
+  --ink-3: #6B6B6B;    /* 最弱信息 */
+
+  /* 底色 */
+  --bg: #000000;
+  --bg-raised: rgba(255, 255, 255, 0.03);
+
+  /* 字体 token */
+  --disp-cjk: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --body-cjk: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  --mono: 'Space Grotesk', 'SF Mono', 'Fira Code', monospace;
+
+  /* 字号档 ≤6 档 */
+  --fs-hero: clamp(3.2rem, 8vw, 7rem);
+  --fs-title: clamp(1.6rem, 3.5vw, 2.4rem);
+  --fs-body: clamp(1.05rem, 2.2vw, 1.25rem);
+  --fs-sm: 0.875rem;
+  --fs-xs: 0.75rem;
+  --fs-mono: 0.8rem;
+
+  /* 间距刻度（一套刻度） */
+  --sp-1: 0.375rem;
+  --sp-2: 0.75rem;
+  --sp-3: 1.5rem;
+  --sp-4: 2.25rem;
+  --sp-5: 3rem;
+  --sp-6: 4.5rem;
+  --sp-8: 7rem;
+
+  /* 动效 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-slow: 1.2s;
+  --dur-med: 0.8s;
+  --dur-fast: 0.35s;
+}
+
+/* ---------- 1. 基础重置 ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body-cjk);
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: auto; /* lenis 接管 */
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 开屏锁滚动 */
+html.lock-scroll body {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ---------- 2. 静态胶片颗粒 + 暗角 ---------- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 180px;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+}
+
+/* ---------- 3. 通用揭示引擎 ---------- */
+.js .reveal { opacity: 0; }
+
+/* 分段慢揭示 */
+.reveal-stagger .reveal { transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); }
+.reveal-stagger .reveal { transform: translateY(24px); }
+.reveal-stagger .reveal.on { opacity: 1; transform: translateY(0); }
+
+/* ---------- 4. 开幕 Gate ---------- */
+#gate {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.8s var(--ease-out);
+}
+#gate.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gate__hint {
+  font-size: var(--fs-body);
+  color: var(--ink-2);
+  letter-spacing: 0.15em;
+  margin-bottom: var(--sp-5);
+  text-align: center;
+  padding: 0 var(--sp-4);
+}
+
+.gate__cta {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--ac);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid rgba(217, 52, 28, 0.35);
+  border-radius: 2px;
+  animation: gatePulse 2.4s ease-in-out infinite;
+  transition: background 0.3s, border-color 0.3s;
+}
+.gate__cta:hover {
+  background: rgba(217, 52, 28, 0.12);
+  border-color: rgba(217, 52, 28, 0.6);
+}
+
+@keyframes gatePulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* gate 阶段的粒子 canvas */
+#gateParticles {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ---------- 5. 叙事段 ---------- */
+.scene {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) var(--sp-4);
+  position: relative;
+}
+
+.scene__chapter {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--ac);
+  letter-spacing: 0.3em;
+  margin-bottom: var(--sp-4);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s var(--ease-out) 0.1s, transform 0.7s var(--ease-out) 0.1s;
+}
+.scene__chapter.on {
+  opacity: 0.7;
+  transform: translateY(0);
+}
+
+.scene__lines {
+  text-align: center;
+  max-width: 640px;
+}
+
+.scene__line {
+  font-size: var(--fs-title);
+  font-weight: 300;
+  line-height: 2;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.75s var(--ease-out), transform 0.75s var(--ease-out);
+  /* 中文断行：balance 防孤字 */
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.scene__line.on {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 强调词 = 纯色实心（T1：不渐变不发光） */
+.scene__line .em {
+  color: var(--ac);
+  font-weight: 600;
+}
+
+/* ---------- 6. 英雄大字（终幕告白） ---------- */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) var(--sp-4);
+  position: relative;
+}
+
+.hero-text {
+  font-family: var(--disp-cjk);
+  font-weight: 900;
+  font-size: var(--fs-hero);
+  line-height: 1.15;
+  text-align: center;
+  letter-spacing: 0.02em;
+  /* 纯色实心，不渐变不发光（T1） */
+  color: var(--ink);
+  position: relative;
+  z-index: 2;
+  /* 入场：淡淡浮现+微缩放 */
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+}
+.hero-text.on {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---------- 7. 终幕 ---------- */
+#finale {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+}
+
+.finale__title {
+  font-family: var(--disp-cjk);
+  font-weight: 900;
+  font-size: var(--fs-hero);
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: var(--sp-3);
+}
+
+.finale__sub {
+  font-size: var(--fs-body);
+  color: var(--ink-2);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--sp-5);
+}
+
+.finale__contact {
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  letter-spacing: 0.15em;
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 2px;
+  background: none;
+  cursor: pointer;
+  transition: border-color 0.3s, color 0.3s;
+}
+.finale__contact:hover {
+  border-color: var(--ac);
+  color: var(--ac);
+}
+
+/* ---------- 8. 氛围 canvas ---------- */
+#moodField {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---------- 9. 过渡分隔 ---------- */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30vh;
+  gap: 0;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  height: 1px;
+  width: 0;
+  background: rgba(255,255,255,0.12);
+  transition: width 1.2s var(--ease-out);
+}
+.divider.on::before { width: min(120px, 18vw); }
+.divider.on::after  { width: min(120px, 18vw); }
+
+.divider__diamond {
+  width: 7px;
+  height: 7px;
+  background: var(--ac);
+  transform: rotate(45deg) scale(0);
+  margin: 0 var(--sp-2);
+  transition: transform 0.9s var(--ease-spring);
+}
+.divider.on .divider__diamond { transform: rotate(45deg) scale(1); }
+
+/* ---------- 10. 声控/UI ---------- */
+#sound {
+  position: fixed;
+  bottom: var(--sp-4);
+  right: var(--sp-4);
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: none;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, color 0.3s;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), border-color 0.3s, color 0.3s;
+}
+#sound.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+#sound:hover {
+  border-color: rgba(255,255,255,0.4);
+  color: var(--ink);
+}
+
+/* ---------- 11. 进度指示 ---------- */
+#progressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--ac);
+  z-index: 101;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* ---------- 12. 降级路径 ---------- */
+
+/* reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .scene__chapter,
+  .scene__line { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .divider::before,
+  .divider::after { width: min(120px, 18vw) !important; transition: none !important; }
+  .divider__diamond { transform: rotate(45deg) scale(1) !important; }
+  #gateParticles { display: none; }
+  #moodField { display: none; }
+  .grain { display: none; }
+}
+
+/* 移动端调整 */
+@media (max-width: 640px) {
+  :root {
+    --fs-hero: clamp(2.4rem, 10vw, 3.6rem);
+    --fs-title: clamp(1.1rem, 4.5vw, 1.5rem);
+    --sp-6: 3rem;
+    --sp-8: 4rem;
+  }
+  .scene__line { line-height: 2.2; }
+  #sound { bottom: var(--sp-3); right: var(--sp-3); }
+}
+
+/* 无 JS 降级 */
+.no-js .reveal { opacity: 1; }
+.no-js #gate { display: none; }

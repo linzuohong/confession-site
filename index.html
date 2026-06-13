@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="js lock-scroll">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>给你的一封信</title>
+  <meta name="description" content="有些话，想让你听见。">
+
+  <!-- favicon（P24 · SVG data-URI 内联，品牌色，零 404） -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23000'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='22' fill='%23D9341C'%3E♥%3C/text%3E%3C/svg%3E">
+
+  <!-- og 分享卡（P40） -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="给你的一封信">
+  <meta property="og:description" content="有些话，想让你听见。">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Google Fonts: 900 子集（P22 · 只加载用到的字） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@900&text=遇见你心动坦白等回答我喜欢们一起来的故写成两个人版本那天世界就悄悄变了颜色后现发现待成最确定事笑时好像能听见声都轻所以想告诉不兴反复确认之依然果愿意接下去故事&display=swap" rel="stylesheet">
+
+  <!-- Space Grotesk（数字/标签/章节号） -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 静态胶片颗粒 + 暗角（P17） -->
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- 情绪节点场 canvas（P16） -->
+  <canvas id="moodField" aria-hidden="true"></canvas>
+
+  <!-- Gate 粒子 canvas -->
+  <canvas id="gateParticles" aria-hidden="true"></canvas>
+
+  <!-- ========== 开幕 Gate（P1） ========== -->
+  <div id="gate" role="button" aria-label="点击进入">
+    <p class="gate__hint">有一句话，想亲口告诉你</p>
+    <span class="gate__cta">▶ 点击进入</span>
+  </div>
+
+  <!-- ========== 进度条 ========== -->
+  <div id="progressBar" aria-hidden="true"></div>
+
+  <!-- ========== 声控按钮 ========== -->
+  <button id="sound" aria-label="音乐开关" title="音乐开关">♪</button>
+
+  <!-- ========== 正文：叙事场景 ========== -->
+  <main id="story">
+
+    <!-- Scene 01 · 遇见 / T15: 不打 ACT 标签，用分隔线暗示换幕 -->
+    <div class="divider" aria-hidden="true">
+      <span class="divider__diamond"></span>
+    </div>
+
+    <section class="scene" id="scene-meet" aria-labelledby="ch-meet">
+      <span class="scene__chapter" id="ch-meet">01&ensp;遇见</span>
+      <div class="scene__lines">
+        <p class="scene__line">有些人出现得刚好，</p>
+        <p class="scene__line">像某个普通的下午，</p>
+        <p class="scene__line">你推开门，</p>
+        <p class="scene__line">世界就<span class="em">悄悄变了颜色</span>。</p>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <span class="divider__diamond"></span>
+    </div>
+
+    <!-- Scene 02 · 心动 -->
+    <section class="scene" id="scene-feel" aria-labelledby="ch-feel">
+      <span class="scene__chapter" id="ch-feel">02&ensp;心动</span>
+      <div class="scene__lines">
+        <p class="scene__line">后来我发现，</p>
+        <p class="scene__line"><span class="em">期待见到你</span>，</p>
+        <p class="scene__line">成了每天最确定的事。</p>
+        <p class="scene__line">你笑的时候，</p>
+        <p class="scene__line">我好像能听见风声都变轻。</p>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <span class="divider__diamond"></span>
+    </div>
+
+    <!-- Scene 03 · 坦白 → 英雄大字告白（T1: 纯色实心，不渐变不发光） -->
+    <section class="scene" id="scene-confess" aria-labelledby="ch-confess">
+      <span class="scene__chapter" id="ch-confess">03&ensp;坦白</span>
+      <div class="scene__lines" style="margin-bottom: var(--sp-8);">
+        <p class="scene__line">所以我想告诉你，</p>
+      </div>
+      <!-- 英雄大字 = 纯白实心 900，力量靠字重与纯度（T1/T21） -->
+      <p class="hero-text" id="heroText">我喜欢你</p>
+      <canvas id="heroCanvas" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+      <div class="scene__lines" style="margin-top: var(--sp-8);">
+        <p class="scene__line">不是一时兴起，</p>
+        <p class="scene__line">是反复确认之后，</p>
+        <p class="scene__line"><span class="em">依然确定的答案</span>。</p>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <span class="divider__diamond"></span>
+    </div>
+
+    <!-- Scene 04 · 等你 -->
+    <section class="scene" id="scene-invite" aria-labelledby="ch-invite">
+      <span class="scene__chapter" id="ch-invite">04&ensp;等你</span>
+      <div class="scene__lines">
+        <p class="scene__line">如果你愿意，</p>
+        <p class="scene__line"><span class="em">我们一起</span>，</p>
+        <p class="scene__line">把接下来的故事，</p>
+        <p class="scene__line">写成两个人的版本。</p>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">
+      <span class="divider__diamond"></span>
+    </div>
+
+    <!-- ========== 终幕 ========== -->
+    <section id="finale" aria-labelledby="fin-title">
+      <h2 class="finale__title" id="fin-title">等你回答</h2>
+      <p class="finale__sub">不管答案是什么，谢谢你来过我的世界</p>
+      <!-- 联系方式（data.js 里填了才显示） -->
+      <div id="contactArea" style="display:none;">
+        <button class="finale__contact" id="copyContact">复制联系方式</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== 脚本（顺序加载） ========== -->
+  <script src="js/data.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- 联系方式动态填充 -->
+  <script>
+    (function () {
+      if (window.CONFESSION && window.CONFESSION.finale && window.CONFESSION.finale.contact) {
+        var area = document.getElementById('contactArea');
+        var btn = document.getElementById('copyContact');
+        if (area && btn) {
+          area.style.display = '';
+          var contact = window.CONFESSION.finale.contact;
+          btn.addEventListener('click', function () {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(contact).then(function () {
+                btn.textContent = '已复制 ✓';
+                setTimeout(function () { btn.textContent = '复制联系方式'; }, 1800);
+              }).catch(function () {
+                fallbackCopy(contact, btn);
+              });
+            } else {
+              fallbackCopy(contact, btn);
+            }
+          });
+        }
+      }
+
+      function fallbackCopy(text, btn) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); btn.textContent = '已复制 ✓'; } catch (e) { btn.textContent = '复制失败'; }
+        document.body.removeChild(ta);
+        setTimeout(function () { btn.textContent = '复制联系方式'; }, 1800);
+      }
+    })();
+  </script>
+
+</body>
+</html>
