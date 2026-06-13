@@ -170,10 +170,11 @@ html.lock-scroll body {
 }
 
 .scene__chapter {
-  font-family: var(--mono);
+  font-family: var(--body-cjk);
+  font-weight: 300;
   font-size: var(--fs-xs);
-  color: var(--ac);
-  letter-spacing: 0.3em;
+  color: var(--ink-3);
+  letter-spacing: 0.25em;
   margin-bottom: var(--sp-4);
   opacity: 0;
   transform: translateY(12px);
@@ -243,6 +244,28 @@ html.lock-scroll body {
 .hero-text.on {
   opacity: 1;
   transform: scale(1);
+}
+
+/* ---------- 6.5 静默段（告白后的呼吸间隙） ---------- */
+.silence {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.silence__dots {
+  font-size: var(--fs-title);
+  color: var(--ink-3);
+  letter-spacing: 0.4em;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 1.8s ease, transform 1.8s ease;
+}
+.silence__dots.on {
+  opacity: 0.45;
+  transform: translateY(0);
 }
 
 /* ---------- 7. 终幕 ---------- */

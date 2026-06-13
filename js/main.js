@@ -164,7 +164,7 @@
       vy: (Math.random() - 0.5) * 0.18,
       a: Math.random() * 0.28 + 0.12,
       phase: Math.random() * Math.PI * 2,
-      isHeart: i < N * 0.12,  // ~12% 是心形
+      isHeart: i < N * 0.06,  // ~6% 心形，克制
       heartPhase: Math.random() * Math.PI * 2,
     }));
 
@@ -367,7 +367,28 @@
   }
 
   // ============================================================
-  // 4. 终幕揭示
+  // 4.5 静默段揭示
+  // ============================================================
+
+  const silence = document.querySelector('.silence');
+  const silenceRevealed = { done: false };
+
+  function checkSilence() {
+    if (silenceRevealed.done) return;
+    if (!silence) return;
+    if (isInView(silence, 0.72)) {
+      silenceRevealed.done = true;
+      const dots = silence.querySelector('.silence__dots');
+      if (dots) {
+        setTimeout(() => {
+          dots.classList.add('on');
+        }, 600);  // 进视口后延迟 600ms，让人先意识到空白
+      }
+    }
+  }
+
+  // ============================================================
+  // 5. 终幕揭示
   // ============================================================
 
   const finale = document.getElementById('finale');
@@ -448,7 +469,7 @@
         r: Math.random() * 3 + 1.5,
         life: 1,
         decay: Math.random() * 0.015 + 0.008,
-        isHeart: Math.random() < 0.4,
+        isHeart: Math.random() < 0.2,  // 内敛，不多余
       };
     });
   }
@@ -504,7 +525,7 @@
         } else {
           heroCtx.beginPath();
           heroCtx.arc(cx, cy, p.r, 0, Math.PI * 2);
-          heroCtx.fillStyle = `rgba(255,200,180,${p.life * 0.5})`;
+          heroCtx.fillStyle = `rgba(217,52,28,${p.life * 0.4})`;  // 深暖红，不偏粉
           heroCtx.fill();
         }
       }
@@ -578,6 +599,7 @@
     if (!ticking) {
       requestAnimationFrame(() => {
         checkReveals();
+        checkSilence();
         checkFinale();
         updateProgressBar();
         ticking = false;
